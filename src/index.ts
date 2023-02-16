@@ -71,10 +71,8 @@ async function main() {
       bills.push(data);
     });
   }
-  const sortBills = bills.sort((a, b) => {
-    const prev = +new Date(a.date)
-    const next = +new Date(b.date)
-    return prev - next;
+  const sortBills = bills.sort((compareA, compareB) => {
+    return (new Date(compareA.date) as any) - (new Date(compareB.date) as any);
   });
 
   console.log(sortBills);
