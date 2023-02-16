@@ -51,7 +51,7 @@ export async function addPage(item: DataType) {
           type: "date",
           date: {
             start: new Date(item.date).toISOString(),
-            time_zone: "Asia/Shanghai",
+            time_zone: "Asia/Shanghai"
           },
         },
         "来源": {

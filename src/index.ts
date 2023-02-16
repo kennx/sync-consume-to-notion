@@ -24,6 +24,24 @@ function stringToFloat(str: string): number {
   return !!parseFloat(str) ? parseFloat(str) : 0;
 }
 
+function toISOString(dateStr: string) {
+  let _arr = dateStr.split(" ");
+  _arr[0] += "T";
+  _arr[1] += "Z";
+  return _arr.join("");
+}
+
+function handleName(name: string, type: string, party: string) {
+  if (name === "/" || type !== "微信红包") {
+    return `${party} ${type}`
+  }
+  return name;
+}
+
+function handleBio(bio: string) {
+  return bio === "/" ? "" : bio;
+}
+
 function transformData(item: WePayDataType & AliPayDataType): DataType {
   const counterparty = item["交易对方"];
   const transactionType = item["交易来源地"] || item["交易类型"];
@@ -34,15 +52,16 @@ function transformData(item: WePayDataType & AliPayDataType): DataType {
   const date = item["交易创建时间"] || item["交易时间"];
   const source = !!item["支付方式"] ? "微信" : "支付宝";
   const bio = item["备注"];
+  const iso = toISOString(date);
   return {
-    name,
+    name: handleName(name, transactionType, counterparty),
     counterparty,
     incomeExpenses,
     amount: stringToFloat(amount),
     transactionType,
-    status,
-    date,
-    bio: !!bio ? bio : "unknown",
+    status: status.match(/[\u4e00-\u9fa5]/gm)?.join("") || status,
+    date: iso,
+    bio: handleBio(bio),
     source,
   };
 }
@@ -72,13 +91,12 @@ function delay(ms: number) {
 async function main() {
   try {
     const results = await generateBills();
-    await addPage(results[0]);
-    // const total = results.length;
-    // for (let i = 0; i < results.length; i++) {
-    //   const item = results[i];
-    //   await addPage(item);
-    //   console.log("✅", `${i + 1}/${total}`, item.name, item.source);
-    // }
+    const total = results.length;
+    for (let i = 0; i < results.length; i++) {
+      const item = results[i];
+      await addPage(item);
+      console.log("✅", `${i + 1}/${total}`, item.name, item.source);
+    }
   } catch (error) {
     throw error
   }
