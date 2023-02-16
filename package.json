@@ -1,0 +1,23 @@
+{
+  "name": "notion-sync-strava",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm ts-node --project tsconfig.node.json src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.13.0",
+    "dotenv": "^16.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.3",
+    "@types/csvtojson": "^2.0.0",
+    "csvtojson": "^2.0.10"
+  }
+}
