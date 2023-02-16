@@ -33,15 +33,13 @@ export type WePayDataType = {
 
 
 export type DataType = {
-  tradeId: string;
-  orderId: string;
   name: string;
   counterparty: string;
   incomeExpenses: string;
   amount: number;
   transactionType: string;
   status: string;
-  date: string | Date;
+  date: string;
   bio: string;
   source: string;
 }

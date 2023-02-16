@@ -1,5 +1,6 @@
 import csv from "csvtojson/v2";
 import fs from "fs/promises";
+import { addPage } from "./notion";
 
 import type { AliPayDataType, WePayDataType, DataType } from "./type";
 
@@ -24,8 +25,6 @@ function stringToFloat(str: string): number {
 }
 
 function transformData(item: WePayDataType & AliPayDataType): DataType {
-  const tradeId = item["交易单号"] || item["交易号"];
-  const orderId = item["商家订单号"] || item["商户单号"];
   const counterparty = item["交易对方"];
   const transactionType = item["交易来源地"] || item["交易类型"];
   const name = item["商品名称"] || item["商品"];
@@ -36,8 +35,6 @@ function transformData(item: WePayDataType & AliPayDataType): DataType {
   const source = !!item["支付方式"] ? "微信" : "支付宝";
   const bio = item["备注"];
   return {
-    tradeId,
-    orderId,
     name,
     counterparty,
     incomeExpenses,
@@ -45,21 +42,12 @@ function transformData(item: WePayDataType & AliPayDataType): DataType {
     transactionType,
     status,
     date,
-    bio,
+    bio: !!bio ? bio : "unknown",
     source,
   };
 }
 
-async function writeFile(data: string) {
-  try {
-    await fs.writeFile("./bills.json", data, { encoding: "utf-8" });
-    console.log("OK");
-  } catch (error) {
-    console.log(error?.toString());
-  }
-}
-
-async function main() {
+async function generateBills() {
   const bills: Array<DataType> = [];
   const fileNames = await getDirFiles();
   for (let i = 0; i < fileNames.length; i++) {
@@ -74,8 +62,26 @@ async function main() {
   const sortBills = bills.sort((compareA, compareB) => {
     return (new Date(compareA.date) as any) - (new Date(compareB.date) as any);
   });
+  return sortBills;
+}
 
-  console.log(sortBills);
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function main() {
+  try {
+    const results = await generateBills();
+    await addPage(results[0]);
+    // const total = results.length;
+    // for (let i = 0; i < results.length; i++) {
+    //   const item = results[i];
+    //   await addPage(item);
+    //   console.log("✅", `${i + 1}/${total}`, item.name, item.source);
+    // }
+  } catch (error) {
+    throw error
+  }
 }
 
 main();
